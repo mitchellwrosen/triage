@@ -1,0 +1,19 @@
+name: triage
+version: 0
+build-type: Simple
+cabal-version: >= 1.2
+
+executable triage
+  main-is: Main.hs
+  ghc-options: -Wall -threaded -rtsopts
+  build-depends:
+      aeson
+    , base
+    , bytestring
+    , containers
+    , http-conduit
+    , lens
+    , lens-aeson
+    , list-transformer
+    , text
+    , vector
