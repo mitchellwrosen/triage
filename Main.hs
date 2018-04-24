@@ -2,28 +2,19 @@
 {-# language OverloadedStrings   #-}
 {-# language ScopedTypeVariables #-}
 
--- 1. Get Haskell GH repos
-
-import Control.Applicative
 import Control.Lens
-import Control.Monad.IO.Class
 import Data.Aeson
 import Data.Aeson.Lens
-import Data.ByteString (ByteString)
-import Data.Foldable
-import Data.Maybe
-import Data.Semigroup
-import Data.Set (Set)
-import Data.Text (Text)
-import Data.Text.Encoding (encodeUtf8)
-import Data.Vector (Vector, (!))
-import List.Transformer (ListT(..))
+import IO (print)
 import Network.HTTP.Simple
+import Text (encodeUtf8)
+import Vector (Vector)
 
-import qualified Data.ByteString as ByteString
+import qualified ByteString
+import qualified ByteString.Partial as ByteString
 import qualified Data.ByteString.Char8 as Char8
-import qualified Data.Set as Set
-import qualified List.Transformer as ListT
+import qualified ListT as ListT
+import qualified Set as Set
 
 main :: IO ()
 main = do

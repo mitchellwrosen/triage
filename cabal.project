@@ -1,2 +1,5 @@
-packages: .
+packages:
+    .,
+    deps/mitchell-stdlib
+
 with-compiler: ghc-8.2.2

@@ -8,12 +8,12 @@ executable triage
   ghc-options: -Wall -threaded -rtsopts
   build-depends:
       aeson
-    , base
     , bytestring
     , containers
     , http-conduit
     , lens
     , lens-aeson
     , list-transformer
+    , mitchell-stdlib
     , text
     , vector
