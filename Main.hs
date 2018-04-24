@@ -18,22 +18,22 @@ import qualified Text
 main :: IO ()
 main = do
   beginnerLabels :: Set Text <-
-    (do
-      bytes :: Text <-
-        Text.readFile "etc/beginner-labels.txt"
-      pure (Set.fromList (Text.lines bytes)))
-    <|> pure mempty
+    bytes :: Text <-
+      Text.readFile "etc/beginner-labels.txt"
+    pure (Set.fromList (Text.lines bytes))
 
   notBeginnerLabels :: Set Text <-
-    (do
-      bytes :: Text <-
-        Text.readFile "etc/not-beginner-labels.txt"
-      pure (Set.fromList (Text.lines bytes)))
-    <|> pure mempty
+    bytes :: Text <-
+      Text.readFile "etc/not-beginner-labels.txt"
+    pure (Set.fromList (Text.lines bytes))
 
   assert (null (Set.intersection beginnerLabels notBeginnerLabels)) (pure ())
 
   ListT.foldM
+
+    -- Handle each issue by:
+    --   - Printing title/url if it contains at least one beginner label
+    --   - Accumulating unknown labels (to be categorized later)
     (\acc issue -> do
       let labels :: Set Text
           labels =
@@ -43,7 +43,6 @@ main = do
                    . _String
                    . to Set.singleton
 
-      -- Print issue if it contains at least one beginner label
       unless (null (Set.intersection labels beginnerLabels)) $ do
         let title :: Text
             title =
@@ -55,7 +54,6 @@ main = do
 
         Text.putStrLn (title <> " " <> url)
 
-      -- Accumulate unknown labels (to be categorized)
       let unknownLabels :: Set Text
           unknownLabels =
             labels
@@ -63,9 +61,15 @@ main = do
               Set.\\ notBeginnerLabels
 
       pure (acc <> unknownLabels))
+
+    -- Start with the empty set of unknown label
     (pure mempty)
+
+    -- Conclude by printing each unknown label encountered
     (\unknown ->
       putStrLn ("[Unknown labels] " <> show (Set.toList unknown)))
+
+    -- For each repo, for each issue, go
     (do
       repo :: Value <-
         ListT.take 1 githubGetHaskellRepos
