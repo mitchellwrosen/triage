@@ -17,3 +17,5 @@ executable triage
     , mitchell-stdlib
     , text
     , vector
+    -- This only exists for ghci
+    , base-noprelude
