@@ -2,29 +2,27 @@
 {-# language OverloadedStrings   #-}
 {-# language ScopedTypeVariables #-}
 
-import Control.Lens
-import Data.Aeson
+import Control.Lens ((^.), (^?!), to)
 import Data.Aeson.Lens
-import IO (putStrLn)
+import File.Text (readFile)
+import Json.Encode (Value)
 import Network.HTTP.Simple
-import Text (encodeUtf8)
+import Text (decodeUtf8, pack, unpack)
 
-import qualified ByteString
-import qualified Data.ByteString.Char8 as Char8
-import qualified ListT as ListT
-import qualified Set as Set
+import qualified ListT
+import qualified Set
 import qualified Text
 
 main :: IO ()
 main = do
-  beginnerLabels :: Set Text <-
+  beginnerLabels :: Set Text <- do
     bytes :: Text <-
-      Text.readFile "etc/beginner-labels.txt"
+      readFile "etc/beginner-labels.txt"
     pure (Set.fromList (Text.lines bytes))
 
-  notBeginnerLabels :: Set Text <-
+  notBeginnerLabels :: Set Text <- do
     bytes :: Text <-
-      Text.readFile "etc/not-beginner-labels.txt"
+      readFile "etc/not-beginner-labels.txt"
     pure (Set.fromList (Text.lines bytes))
 
   assert (null (Set.intersection beginnerLabels notBeginnerLabels)) (pure ())
@@ -52,7 +50,7 @@ main = do
             url =
               issue ^?! key "url" . _String
 
-        Text.putStrLn (title <> " " <> url)
+        putStrLn (title <> " " <> url)
 
       let unknownLabels :: Set Text
           unknownLabels =
@@ -67,7 +65,7 @@ main = do
 
     -- Conclude by printing each unknown label encountered
     (\unknown ->
-      putStrLn ("[Unknown labels] " <> show (Set.toList unknown)))
+      putStrLn ("[Unknown labels] " <> pack (show (Set.toList unknown))))
 
     -- For each repo, for each issue, go
     (do
@@ -104,10 +102,8 @@ githubGetIssues name = do
   request0 :: Request <-
     liftIO
       (parseRequest
-        (Char8.unpack
-          ("https://api.github.com/repos/"
-            <> encodeUtf8 name
-            <> "/issues?per_page=100")))
+        (unpack
+          ("https://api.github.com/repos/" <> name <> "/issues?per_page=100")))
 
   response0 :: Response Value <-
     liftIO (httpJSON (request0 & addRequestHeader "User-Agent" "Haskell"))
@@ -131,26 +127,26 @@ githubGetIssues name = do
 
 getResponseNext :: Response a -> Maybe Request
 getResponseNext response = do
-  bytes :: ByteString <-
-    lookup "Link" (getResponseHeaders response)
+  bytes :: Text <-
+    decodeUtf8 <$> lookup "Link" (getResponseHeaders response)
 
-  let links :: [ByteString]
+  let links :: [Text]
       links =
-        Char8.split ',' bytes
+        Text.split (== ',') bytes
 
-  url:_ :: [ByteString] <-
+  url:_ :: [Text] <-
     pure (mapMaybe stripNext links)
 
-  parseRequest (Char8.unpack url)
+  parseRequest (unpack url)
 
  where
-  stripNext :: ByteString -> Maybe ByteString
+  stripNext :: Text -> Maybe Text
   stripNext bytes = do
-    prefix :: ByteString <-
-      ByteString.stripSuffix "rel=\"next\"" bytes
+    prefix :: Text <-
+      Text.stripSuffix "rel=\"next\"" bytes
 
     prefix
-      & Char8.dropWhile (/= '<')
-      & ByteString.drop 1
-      & Char8.takeWhile (/= '>')
+      & Text.dropWhile (/= '<')
+      & Text.drop 1
+      & Text.takeWhile (/= '>')
       & Just

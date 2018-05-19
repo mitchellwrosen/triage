@@ -7,15 +7,7 @@ executable triage
   main-is: Main.hs
   ghc-options: -Wall -threaded -rtsopts
   build-depends:
-      aeson
-    , bytestring
-    , containers
-    , http-conduit
+      http-conduit
     , lens
     , lens-aeson
-    , list-transformer
     , mitchell-stdlib
-    , text
-    , vector
-    -- This only exists for ghci
-    , base-noprelude

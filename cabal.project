@@ -3,3 +3,11 @@ packages:
     deps/mitchell-stdlib
 
 with-compiler: ghc-8.2.2
+
+package mitchell-stdlib
+  flags:
+    +aeson
+    +bytestring
+    +containers
+    +list-transformer
+    +text
